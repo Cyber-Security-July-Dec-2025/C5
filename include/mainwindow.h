@@ -1,6 +1,8 @@
-#pragma once
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QByteArray>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,4 +23,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    QByteArray originalData;
+    QByteArray processedData;
+    QByteArray key;
 };
+
+#endif // MAINWINDOW_H
