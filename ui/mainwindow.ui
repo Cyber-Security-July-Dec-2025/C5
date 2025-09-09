@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>700</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Crypto S/W App1</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+    <layout class="QHBoxLayout" name="operationLayout">
+     <item>
+      <widget class="QLabel" name="operationLabel">
+       <property name="text">
+        <string>Operation:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="operationCombo">
+       <item>
+        <property name="text">
+         <string>Generate Symmetric Key</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES Encrypt (CBC)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AES Decrypt (CBC)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SHA-256</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>HMAC-SHA256</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+    </item>
+    <item>
+    <layout class="QHBoxLayout" name="inputLayout">
+     <item>
+      <widget class="QLabel" name="inputLabel">
+       <property name="text">
+        <string>Input File:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="inputPathEdit"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uploadButton">
+       <property name="text">
+        <string>Upload</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+    </item>
+    <item>
+    <layout class="QHBoxLayout" name="aesKeyLayout">
+     <item>
+      <widget class="QLabel" name="aesKeyLabel">
+       <property name="text">
+        <string>AES Key (hex, optional):</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="keyHexEdit"/>
+     </item>
+    </layout>
+    </item>
+    <item>
+    <layout class="QHBoxLayout" name="hmacKeyLayout">
+     <item>
+      <widget class="QLabel" name="hmacKeyLabel">
+       <property name="text">
+        <string>HMAC Key (hex, optional):</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="hmacKeyHexEdit"/>
+     </item>
+    </layout>
+    </item>
+    <item>
+    <layout class="QHBoxLayout" name="buttonsLayout">
+     <item>
+      <widget class="QPushButton" name="processButton">
+       <property name="text">
+        <string>Process</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="downloadButton">
+       <property name="text">
+        <string>Download Output</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="outputLabel">
+      <property name="text">
+       <string>Output:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="outputText">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string>Status: Ready</string>
+      </property>
+     </widget>
+    </item>
+
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>100</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar"/>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
