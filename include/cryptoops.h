@@ -6,6 +6,7 @@ namespace CryptoOps {
 
 bool loadConfig(const QString &path);
 
+QString getAesMode();
 QByteArray generateSymmetricKey();
 QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key);
 QByteArray aesDecrypt(const QByteArray &cipher, const QByteArray &key);

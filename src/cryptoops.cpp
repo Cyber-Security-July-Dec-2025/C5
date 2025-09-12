@@ -14,11 +14,16 @@
 
 namespace CryptoOps {
 
-// Defaults (overwritten by config.json)
 static int AES_KEY_SIZE = 32;
 static int HMAC_KEY_SIZE = 32;
 static bool config_loaded = false;
 static QString configPath = "../config.json";
+static QString AES_MODE = "cbc";
+
+QString getAesMode() {
+    if (!config_loaded) loadConfig(configPath);
+    return AES_MODE;
+}   
 
 bool loadConfig(const QString &path)
 {
@@ -43,6 +48,9 @@ bool loadConfig(const QString &path)
         QJsonObject aesObj = root["aes"].toObject();
         if (aesObj.contains("key_size"))
             AES_KEY_SIZE = aesObj["key_size"].toInt(32);
+
+        if (aesObj.contains("mode"))
+            AES_MODE = aesObj["mode"].toString().toLower();  // "cbc" or "ecb"
     }
     if (root.contains("hmac")) {
         QJsonObject hmacObj = root["hmac"].toObject();
@@ -52,7 +60,8 @@ bool loadConfig(const QString &path)
 
     config_loaded = true;
     qDebug() << "Config loaded: AES_KEY_SIZE =" << AES_KEY_SIZE
-             << ", HMAC_KEY_SIZE =" << HMAC_KEY_SIZE;
+             << ", HMAC_KEY_SIZE =" << HMAC_KEY_SIZE
+             << ", AES_MODE =" << AES_MODE;
     return true;
 }
 
@@ -68,69 +77,122 @@ QByteArray generateSymmetricKey()
 
 QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key)
 {
+    if (!config_loaded) loadConfig(configPath);
     if (key.size() != AES_KEY_SIZE) {
         qWarning() << "AES encryption error: invalid key size";
         return QByteArray();
     }
 
     CryptoPP::AutoSeededRandomPool rng;
-    CryptoPP::SecByteBlock iv(CryptoPP::AES::BLOCKSIZE);
-    rng.GenerateBlock(iv, iv.size());
-
     QByteArray cipher;
+
     try {
-        CryptoPP::CBC_Mode<CryptoPP::AES>::Encryption encryptor(
-            reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size(), iv);
+        if (AES_MODE == "cbc") {
+            CryptoPP::SecByteBlock iv(CryptoPP::AES::BLOCKSIZE);
+            rng.GenerateBlock(iv, iv.size());
 
-        std::string encrypted;
-        CryptoPP::StringSource ss(
-            std::string(data.constData(), data.size()), true,
-            new CryptoPP::StreamTransformationFilter(
-                encryptor,
-                new CryptoPP::StringSink(encrypted)
-            )
-        );
+            CryptoPP::CBC_Mode<CryptoPP::AES>::Encryption encryptor(
+                reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size(), iv);
 
-        cipher = QByteArray(reinterpret_cast<const char*>(iv.data()), iv.size());
-        cipher.append(QByteArray::fromStdString(encrypted));
+            std::string encrypted;
+            CryptoPP::StringSource ss(
+                std::string(data.constData(), data.size()), true,
+                new CryptoPP::StreamTransformationFilter(
+                    encryptor,
+                    new CryptoPP::StringSink(encrypted)
+                )
+            );
+
+            cipher = QByteArray(reinterpret_cast<const char*>(iv.data()), iv.size());
+            cipher.append(QByteArray::fromStdString(encrypted));
+        }
+        else if (AES_MODE == "ecb") {
+            CryptoPP::ECB_Mode<CryptoPP::AES>::Encryption encryptor(
+                reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size());
+
+            std::string encrypted;
+            CryptoPP::StringSource ss(
+                std::string(data.constData(), data.size()), true,
+                new CryptoPP::StreamTransformationFilter(
+                    encryptor,
+                    new CryptoPP::StringSink(encrypted)
+                )
+            );
+
+            cipher = QByteArray::fromStdString(encrypted);
+        }
+        else {
+            qWarning() << "Invalid AES mode:" << AES_MODE;
+            return QByteArray();
+        }
     }
     catch (const CryptoPP::Exception &e) {
         qWarning("AES encryption error: %s", e.what());
     }
+
     return cipher;
 }
 
 QByteArray aesDecrypt(const QByteArray &cipher, const QByteArray &key)
 {
-    if (cipher.size() < CryptoPP::AES::BLOCKSIZE || key.size() != AES_KEY_SIZE) {
-        qWarning() << "AES decryption error: invalid input or key size";
+    if (!config_loaded) loadConfig(configPath);
+    if (key.size() != AES_KEY_SIZE) {
+        qWarning() << "AES decryption error: invalid key size";
         return QByteArray();
     }
 
-    QByteArray ivBytes = cipher.left(CryptoPP::AES::BLOCKSIZE);
-    QByteArray encrypted = cipher.mid(CryptoPP::AES::BLOCKSIZE);
-
     QByteArray plain;
+
     try {
-        CryptoPP::CBC_Mode<CryptoPP::AES>::Decryption decryptor(
-            reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size(),
-            reinterpret_cast<const CryptoPP::byte*>(ivBytes.data())
-        );
+        if (AES_MODE == "cbc") {
+            if (cipher.size() < CryptoPP::AES::BLOCKSIZE) {
+                qWarning() << "AES decryption error: invalid cipher length";
+                return QByteArray();
+            }
 
-        std::string decrypted;
-        CryptoPP::StringSource ss(
-            std::string(encrypted.constData(), encrypted.size()), true,
-            new CryptoPP::StreamTransformationFilter(
-                decryptor,
-                new CryptoPP::StringSink(decrypted)
-            )
-        );
+            QByteArray ivBytes = cipher.left(CryptoPP::AES::BLOCKSIZE);
+            QByteArray encrypted = cipher.mid(CryptoPP::AES::BLOCKSIZE);
 
-        plain = QByteArray::fromStdString(decrypted);
+            CryptoPP::CBC_Mode<CryptoPP::AES>::Decryption decryptor(
+                reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size(),
+                reinterpret_cast<const CryptoPP::byte*>(ivBytes.data())
+            );
+
+            std::string decrypted;
+            CryptoPP::StringSource ss(
+                std::string(encrypted.constData(), encrypted.size()), true,
+                new CryptoPP::StreamTransformationFilter(
+                    decryptor,
+                    new CryptoPP::StringSink(decrypted)
+                )
+            );
+
+            plain = QByteArray::fromStdString(decrypted);
+        }
+        else if (AES_MODE == "ecb") {
+            CryptoPP::ECB_Mode<CryptoPP::AES>::Decryption decryptor(
+                reinterpret_cast<const CryptoPP::byte*>(key.data()), key.size());
+
+            std::string decrypted;
+            CryptoPP::StringSource ss(
+                std::string(cipher.constData(), cipher.size()), true,
+                new CryptoPP::StreamTransformationFilter(
+                    decryptor,
+                    new CryptoPP::StringSink(decrypted)
+                )
+            );
+
+            plain = QByteArray::fromStdString(decrypted);
+        }
+        else {
+            qWarning() << "Invalid AES mode:" << AES_MODE;
+            return QByteArray();
+        }
     }
     catch (const CryptoPP::Exception &e) {
         qWarning("AES decryption error: %s", e.what());
     }
+
     return plain;
 }
 
@@ -156,11 +218,6 @@ QString hmacDigest(const QByteArray &data, const QByteArray &key)
 {
     if (!config_loaded) loadConfig(configPath);
 
-    // if (key.size() != HMAC_KEY_SIZE) {
-    //     qWarning() << "Invalid HMAC key size, expected" << HMAC_KEY_SIZE;
-    //     return QString();
-    // }
-
     std::string mac;
     try {
         CryptoPP::HMAC<CryptoPP::SHA256> hmac(
@@ -179,4 +236,4 @@ QString hmacDigest(const QByteArray &data, const QByteArray &key)
     return QString::fromStdString(mac);
 }
 
-} 
+}

@@ -11,7 +11,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QString mode = CryptoOps::getAesMode().toUpper();  
+    ui->operationCombo->clear();
 
+    ui->operationCombo->addItem("Generate Symmetric Key");
+    ui->operationCombo->addItem("AES Encrypt (" + mode + ")");
+    ui->operationCombo->addItem("AES Decrypt (" + mode + ")");
+    ui->operationCombo->addItem("SHA-256");
+    ui->operationCombo->addItem("HMAC-SHA256");
+
+    ui->statusLabel->setText("Status: Config loaded with AES mode = " + mode);
     connect(ui->uploadButton,   &QPushButton::clicked, this, &MainWindow::onUploadClicked);
     connect(ui->processButton,  &QPushButton::clicked, this, &MainWindow::onProcessClicked);
     connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::onDownloadClicked);
@@ -58,7 +67,7 @@ void MainWindow::onProcessClicked()
         ui->keyHexEdit->setText(key.toHex());
         ui->outputText->setPlainText("Generated Key (hex): " + key.toHex());
     }
-    else if (op == "AES Encrypt (CBC)") {
+    else if (op.startsWith("AES Encrypt")) {
         if (originalData.isEmpty()) {
             QMessageBox::warning(this, "Error", "No input file loaded.");
             return;
@@ -73,7 +82,7 @@ void MainWindow::onProcessClicked()
 
         ui->outputText->setPlainText("Encrypted Data (hex):\n" + processedData.toHex());
     }
-    else if (op == "AES Decrypt (CBC)") {
+    else if (op.startsWith("AES Decrypt")) {
         if (originalData.isEmpty()) {
             QMessageBox::warning(this, "Error", "No input file loaded.");
             return;
