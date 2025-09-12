@@ -4,7 +4,6 @@
 
 namespace CryptoOps {
 
-// Stub functions — implement later
 
 QByteArray generateSymmetricKey();
 QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key);

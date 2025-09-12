@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Connect buttons
+
     connect(ui->uploadButton,   &QPushButton::clicked, this, &MainWindow::onUploadClicked);
     connect(ui->processButton,  &QPushButton::clicked, this, &MainWindow::onProcessClicked);
     connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::onDownloadClicked);

@@ -10,21 +10,20 @@
 
 namespace CryptoOps {
 
-// Generate a 256-bit (32-byte) symmetric key
+
 QByteArray generateSymmetricKey()
 {
     CryptoPP::AutoSeededRandomPool rng;
-    QByteArray key(32, 0); // 256-bit
+    QByteArray key(32, 0);
     rng.GenerateBlock(reinterpret_cast<CryptoPP::byte*>(key.data()), key.size());
     return key;
 }
 
-// AES-256 encryption (CBC mode, with random IV prepended to ciphertext)
+
 QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key)
 {
     CryptoPP::AutoSeededRandomPool rng;
 
-    // IV must be AES::BLOCKSIZE (16 bytes)
     CryptoPP::SecByteBlock iv(CryptoPP::AES::BLOCKSIZE);
     rng.GenerateBlock(iv, iv.size());
 
@@ -42,7 +41,7 @@ QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key)
             )
         );
 
-        // Prepend IV to ciphertext
+
         cipher = QByteArray(reinterpret_cast<const char*>(iv.data()), iv.size());
         cipher.append(QByteArray::fromStdString(encrypted));
     }
@@ -53,11 +52,11 @@ QByteArray aesEncrypt(const QByteArray &data, const QByteArray &key)
     return cipher;
 }
 
-// AES-256 decryption (expects IV prepended to ciphertext)
+
 QByteArray aesDecrypt(const QByteArray &cipher, const QByteArray &key)
 {
     if (cipher.size() < CryptoPP::AES::BLOCKSIZE) {
-        return QByteArray(); // too short
+        return QByteArray();
     }
 
     QByteArray ivBytes = cipher.left(CryptoPP::AES::BLOCKSIZE);
@@ -88,7 +87,7 @@ QByteArray aesDecrypt(const QByteArray &cipher, const QByteArray &key)
     return plain;
 }
 
-// SHA-256 digest (hex string)
+
 QString sha256Digest(const QByteArray &data)
 {
     std::string digest;
@@ -108,7 +107,7 @@ QString sha256Digest(const QByteArray &data)
     return QString::fromStdString(digest);
 }
 
-// HMAC-SHA256 (hex string)
+
 QString hmacDigest(const QByteArray &data, const QByteArray &key)
 {
     std::string mac;
@@ -130,4 +129,4 @@ QString hmacDigest(const QByteArray &data, const QByteArray &key)
     return QString::fromStdString(mac);
 }
 
-} // namespace CryptoOps
+}

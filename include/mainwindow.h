@@ -29,4 +29,4 @@ private:
     QByteArray key;
 };
 
-#endif // MAINWINDOW_H
+#endif 
