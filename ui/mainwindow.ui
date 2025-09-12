@@ -81,7 +81,7 @@
      <item>
       <widget class="QLabel" name="aesKeyLabel">
        <property name="text">
-        <string>AES Key (hex, optional):</string>
+        <string>AES Key (hex):</string>
        </property>
       </widget>
      </item>
@@ -95,7 +95,7 @@
      <item>
       <widget class="QLabel" name="hmacKeyLabel">
        <property name="text">
-        <string>HMAC Key (hex, optional):</string>
+        <string>HMAC Key (hex):</string>
        </property>
       </widget>
      </item>

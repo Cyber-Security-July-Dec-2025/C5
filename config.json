@@ -1,0 +1,10 @@
+{
+    "aes": {
+      "key_size": 32,
+      "mode": "CBC"
+    },
+    "hmac": {
+      "key_size": 32
+    }
+}
+  
