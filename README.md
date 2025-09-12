@@ -80,6 +80,7 @@ The application's behavior for AES operations is determined by the config.json f
 
 Example config.json:
 
+```
 {  
     "aes": {  
       "key\_size": 32,  
@@ -89,7 +90,7 @@ Example config.json:
       "key\_size": 32  
     }  
 }
-
+```
 ## **Usage**
 
 1. **Select Operation:** Choose the cryptographic operation from the dropdown menu.  
